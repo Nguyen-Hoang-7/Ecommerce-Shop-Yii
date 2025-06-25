@@ -1,0 +1,31 @@
+version: '4.5'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yii2_app_ecommerce
+    ports:
+      - "8080:80"
+    volumes:
+      - ./ecommerce_shop:/var/www/html
+    depends_on:
+      - db
+
+  db:
+    image: postgres:17
+    container_name: yii2_postgres_ecommerce
+    restart: always
+    environment:
+      POSTGRES_DB: ecommerce_db
+      POSTGRES_USER: Goku_Black
+      # Ensure the password is strong and secure
+      POSTGRES_PASSWORD: Mesieutocutedechuong1976
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:
