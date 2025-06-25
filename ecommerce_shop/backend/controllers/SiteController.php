@@ -24,7 +24,7 @@ class SiteController extends Controller
                 'class' => AccessControl::class,
                 'rules' => [
                     [
-                        'actions' => ['login', 'error'],
+                        'actions' => ['login', 'forgot-password', 'error'],
                         'allow' => true,
                     ],
                     [
@@ -100,5 +100,12 @@ class SiteController extends Controller
         Yii::$app->user->logout();
 
         return $this->goHome();
+    }
+
+    public function actionForgotPassword()
+    {
+        // This action can be implemented to handle password reset requests.
+        // For now, it can redirect to the login page or render a view.
+        return "Forgot Password";
     }
 }
