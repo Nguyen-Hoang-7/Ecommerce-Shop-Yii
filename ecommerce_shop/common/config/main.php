@@ -9,5 +9,9 @@ return [
         'cache' => [
             'class' => \yii\caching\FileCache::class,
         ],
+        'formatter' => [
+            'class' => 'yii\i18n\Formatter',
+            'currencyCode' => 'VND', // hoặc 'USD', tùy bạn
+        ],
     ],
 ];

@@ -23,7 +23,7 @@ services:
       # Ensure the password is strong and secure
       POSTGRES_PASSWORD: Mesieutocutedechuong1976
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 

@@ -31,7 +31,7 @@ AppAsset::register($this);
         <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
             <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.html">
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?php echo Yii::$app->urlManager->createUrl(['site/index']); ?>">
                 <div class="sidebar-brand-icon rotate-n-15">
                     <i class="fas fa-laugh-wink"></i>
                 </div>
@@ -50,7 +50,7 @@ AppAsset::register($this);
 
             <!-- Nav Item - Charts -->
             <li class="nav-item">
-                <a class="nav-link" href="charts.html">
+                <a class="nav-link" href="<?php echo Yii::$app->urlManager->createUrl(['product/index']); ?>">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Products</span></a>
             </li>
@@ -84,7 +84,7 @@ AppAsset::register($this);
         <div id="content-wrapper" class="d-flex flex-column">
 
             <!-- Main Content -->
-            <div id="content">
+            <div>
 
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
@@ -202,7 +202,7 @@ AppAsset::register($this);
                                 </h6>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_1.svg"
+                                        <img class="rounded-circle" src="/img/undraw_profile_1.svg"
                                             alt="...">
                                         <div class="status-indicator bg-success"></div>
                                     </div>
@@ -214,7 +214,7 @@ AppAsset::register($this);
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_2.svg"
+                                        <img class="rounded-circle" src="/img/undraw_profile_2.svg"
                                             alt="...">
                                         <div class="status-indicator"></div>
                                     </div>
@@ -226,7 +226,7 @@ AppAsset::register($this);
                                 </a>
                                 <a class="dropdown-item d-flex align-items-center" href="#">
                                     <div class="dropdown-list-image mr-3">
-                                        <img class="rounded-circle" src="img/undraw_profile_3.svg"
+                                        <img class="rounded-circle" src="/img/undraw_profile_3.svg"
                                             alt="...">
                                         <div class="status-indicator bg-warning"></div>
                                     </div>
@@ -262,7 +262,7 @@ AppAsset::register($this);
                                     <?php echo Yii::$app->user->isGuest ? 'Guest' : Yii::$app->user->identity->getDisplayName(); ?>
                                 </span>
                                 <img class="img-profile rounded-circle"
-                                    src="img/undraw_profile.svg">
+                                    src="/img/undraw_profile.svg">
                             </a>
                             <!-- Dropdown - User Information -->
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -296,6 +296,10 @@ AppAsset::register($this);
             </div>
             <!-- End of Main Content -->
 
+            <div class="p-4">
+                <?php echo $content; ?>
+            </div>
+
             <!-- Footer -->
             <footer class="sticky-footer bg-white">
                 <div class="container my-auto">
@@ -305,8 +309,6 @@ AppAsset::register($this);
                 </div>
             </footer>
             <!-- End of Footer -->
-
-            <?php echo $content; ?>
 
         </div>
         <!-- End of Content Wrapper -->
