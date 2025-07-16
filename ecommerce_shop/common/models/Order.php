@@ -3,6 +3,7 @@
 namespace common\models;
 
 use Yii;
+use yii\base\Exception;
 
 /**
  * This is the model class for table "{{%orders}}".
@@ -24,7 +25,9 @@ use Yii;
 class Order extends \yii\db\ActiveRecord
 {
 
-
+    const STATUS_DRAFT = 0;
+    const  STATUS_COMPLETED = 1;
+    const STATUS_FAILED = 2;
     /**
      * {@inheritdoc}
      */
@@ -45,7 +48,7 @@ class Order extends \yii\db\ActiveRecord
             [['status', 'created_at', 'created_by'], 'default', 'value' => null],
             [['status', 'created_at', 'created_by'], 'integer'],
             [['firstName', 'lastName'], 'string', 'max' => 45],
-            [['email', 'transaction_id'], 'string', 'max' => 255],
+            [['email', 'transaction_id', 'paypal_order_id'], 'string', 'max' => 255],
             [['created_by'], 'exist', 'skipOnError' => true, 'targetClass' => User::class, 'targetAttribute' => ['created_by' => 'id']],
         ];
     }
@@ -63,6 +66,7 @@ class Order extends \yii\db\ActiveRecord
             'lastName' => 'Last Name',
             'email' => 'Email',
             'transaction_id' => 'Transaction ID',
+            'paypal_order_id' => 'Paypal Order ID',
             'created_at' => 'Created At',
             'created_by' => 'Created By',
         ];
@@ -83,9 +87,9 @@ class Order extends \yii\db\ActiveRecord
      *
      * @return \yii\db\ActiveQuery|\common\models\query\OrderAddressesQuery
      */
-    public function getOrderAddresses()
+    public function getOrderAddress()
     {
-        return $this->hasOne(OrderAddresses::class, ['order_id' => 'id']);
+        return $this->hasOne(OrderAddress::class, ['order_id' => 'id']);
     }
 
     /**
@@ -95,7 +99,7 @@ class Order extends \yii\db\ActiveRecord
      */
     public function getOrderItems()
     {
-        return $this->hasMany(OrderItems::class, ['order_id' => 'id']);
+        return $this->hasMany(OrderItem::class, ['order_id' => 'id']);
     }
 
     /**
@@ -107,4 +111,67 @@ class Order extends \yii\db\ActiveRecord
         return new \common\models\query\OrderQuery(get_called_class());
     }
 
+    public function saveAddress($postData) {
+        $orderAddress = new OrderAddress();
+        $orderAddress->order_id = $this->id;
+        if ($orderAddress->load($postData) && $orderAddress->save()) {
+            
+            return true;
+        } 
+        throw new Exception('Could not save order address: '. implode('<br>', $orderAddress->getFirstErrors()));
+        
+    }
+
+    public function saveOrderItems() {
+        // $transaction = Yii::$app->db->beginTransaction();
+        $cartItems = CartItem::getCartItemsForUser(Yii::$app->user->id);
+        foreach ($cartItems as $item) {
+            $orderItem = new OrderItem();
+            $orderItem->product_name = $item['name'];
+            $orderItem->product_id = $item['id'];
+            $orderItem->quantity = $item['quantity'];
+            $orderItem->unit_price = $item['price'];
+            $orderItem->order_id = $this->id;
+            if (!$orderItem->save()) {
+                // $transaction->rollBack();
+                throw new Exception('Failed to save order item: '. implode('<br>', $orderItem->getFirstErrors()));
+            }
+        }
+
+        // $transaction->commit();
+        return true;
+    }
+
+    public function getItemsQuantity()
+    {
+        $sum = CartItem::findBySql("SELECT SUM(quantity) AS total_quantity from order_items where order_id = :order_id", ["order_id" => $this->id])->scalar();
+        return $sum;
+    }
+
+    public function sendEmailToVendor()
+    {
+        return Yii::$app
+            ->mailer
+            ->compose(
+                ['html' => 'order_completed_vendor-html', 'text' => 'order_completed_vendor-text'],
+                ['order' => $this]
+            )
+            ->setFrom([Yii::$app->params['supportEmail'] => Yii::$app->name . ' robot'])
+            ->setTo(Yii::$app->params['vendorEmail'])
+            ->setSubject('New order has been made at ' . Yii::$app->name)
+            ->send();
+    }
+    public function sendEmailToCustomer()
+    {
+        return Yii::$app
+            ->mailer
+            ->compose(
+                ['html' => 'order_completed_customer-html', 'text' => 'order_completed_customer-text'],
+                ['order' => $this]
+            )
+            ->setFrom([Yii::$app->params['supportEmail'] => Yii::$app->name . ' robot'])
+            ->setTo($this->email)
+            ->setSubject('Your orders is confirmed at ' . Yii::$app->name)
+            ->send();
+    }
 }

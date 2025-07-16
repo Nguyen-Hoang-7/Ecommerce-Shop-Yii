@@ -10,6 +10,7 @@ use yii\bootstrap5\Html;
 use yii\bootstrap5\Nav;
 use yii\bootstrap5\NavBar;
 
+$cartItemParam = $this->params['cartItemCount'];
 AppAsset::register($this);
 ?>
 <?php $this->beginPage() ?>
@@ -31,32 +32,47 @@ AppAsset::register($this);
         'brandLabel' => Yii::$app->name,
         'brandUrl' => Yii::$app->homeUrl,
         'options' => [
-            'class' => 'navbar navbar-expand-md navbar-dark bg-dark fixed-top',
+            'class' => 'navbar-expand-lg navbar-dark bg-dark fixed-top',
         ],
     ]);
     $menuItems = [
         ['label' => 'Home', 'url' => ['/site/index']],
-        ['label' => 'About', 'url' => ['/site/about']],
-        ['label' => 'Contact', 'url' => ['/site/contact']],
+        [
+                'label' => 'Cart <span id="cart-quantity" class="badge bg-danger text-white"">'.$cartItemParam.'</span>',
+                'url' => Yii::$app->user->isGuest ? ['/site/login'] : ['/cart/index'],
+                'encode' => false,
+        ]
+        // ['label' => 'About', 'url' => ['/site/about']],
+        // ['label' => 'Contact', 'url' => ['/site/contact']],
     ];
     if (Yii::$app->user->isGuest) {
         $menuItems[] = ['label' => 'Signup', 'url' => ['/site/signup']];
+        $menuItems[] = ['label' => 'Login', 'url' => ['/site/login']];
+    } else {
+        $username = Yii::$app->user->identity->getDisplayName();
+
+        $menuItems[] = [
+            'label' => $username,
+            'items' => [
+                ['label' => 'Profile', 'url' => ['/profile/index']],
+                ['label' => 'Log out', 'url' => ['/site/logout'], 'linkOptions' => ['data-method' => 'post']],
+                // Add more items as needed
+            ],
+            'options' => ['class' => 'nav-item dropdown'],
+            'linkOptions' => [
+                'class' => 'nav-link dropdown-toggle',
+                'data-bs-toggle' => 'dropdown',
+                'role' => 'button',
+                'aria-expanded' => 'false',
+            ],
+            'dropDownOptions' => ['class' => 'dropdown-menu'],
+        ];
     }
 
     echo Nav::widget([
-        'options' => ['class' => 'navbar-nav me-auto mb-2 mb-md-0'],
+        'options' => ['class' => 'navbar-nav ms-auto'],
         'items' => $menuItems,
     ]);
-    if (Yii::$app->user->isGuest) {
-        echo Html::tag('div',Html::a('Login',['/site/login'],['class' => ['btn btn-link login text-decoration-none']]),['class' => ['d-flex']]);
-    } else {
-        echo Html::beginForm(['/site/logout'], 'post', ['class' => 'd-flex'])
-            . Html::submitButton(
-                'Logout (' . Yii::$app->user->identity->username . ')',
-                ['class' => 'btn btn-link logout text-decoration-none']
-            )
-            . Html::endForm();
-    }
     NavBar::end();
     ?>
 </header>

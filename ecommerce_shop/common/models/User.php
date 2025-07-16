@@ -12,6 +12,8 @@ use yii\web\IdentityInterface;
  * User model
  *
  * @property integer $id
+ * @property string $firstname
+ * @property string $lastname
  * @property string $username
  * @property string $password_hash
  * @property string $password_reset_token
@@ -29,6 +31,8 @@ class User extends ActiveRecord implements IdentityInterface
     const STATUS_INACTIVE = 9;
     const STATUS_ACTIVE = 10;
 
+    public $password; // for signup and update
+    public $passwordConfirm; // for signup and update
 
     /**
      * {@inheritdoc}
@@ -54,6 +58,8 @@ class User extends ActiveRecord implements IdentityInterface
     public function rules()
     {
         return [
+            [['firstname', 'lastname', 'username', 'email'], 'required'],
+            [['firstname', 'lastname', 'username', 'email'], 'string', 'max' => 255],
             ['status', 'default', 'value' => self::STATUS_INACTIVE],
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
         ];
@@ -213,6 +219,20 @@ class User extends ActiveRecord implements IdentityInterface
 
     public function getDisplayName()
     {
+        $fullname = trim($this->firstname . ' ' . $this->lastname);
+        if (!empty($fullname)) {
+            return $fullname;
+        }
         return $this->username;
+    }
+
+    public function getAddresses() {
+        return $this->hasMany(UserAddress::class, ['user_id' => 'id']);
+    }
+
+    public function getAddress(): ?UserAddress {
+        $address = $this->addresses[0] ?? new UserAddress();
+        $address->user_id = $this->id; // Ensure user_id is set
+        return $address;
     }
 }

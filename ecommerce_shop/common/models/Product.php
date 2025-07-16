@@ -130,12 +130,16 @@ class Product extends \yii\db\ActiveRecord
         if ($this->imageFile) {
             $this->image = $this->imageFile->baseName . '.' . $this->imageFile->extension;
         }
+        else {
+            // Nếu không có file hình ảnh, giữ nguyên giá trị cũ
+            $this->image = $this->isNewRecord ? 'default-thumbnail.jpg' : $this->getOldAttribute('image');
+        }
         
         $transaction = Yii::$app->db->beginTransaction();
 
         $ok = parent::save($runValidation, $attributeNames);
 
-        if ($ok) {
+        if ($ok && $this->imageFile) {
             $frontendPath = Yii::getAlias('@frontend/web/storage/products/') . $this->image;
             $backendPath = Yii::getAlias('@backend/web/storage/products/') . $this->image;
 
@@ -151,7 +155,9 @@ class Product extends \yii\db\ActiveRecord
 
             // Copy file từ frontend sang backend (nếu muốn đảm bảo cả hai có file giống nhau)
             copy($frontendPath, $backendPath);
-
+            // $transaction->commit();
+        }
+        if ($ok) {
             $transaction->commit();
         }
         return $ok;
@@ -167,6 +173,12 @@ class Product extends \yii\db\ActiveRecord
 
     public function getImageUrl()
     {
+
         return Yii::$app->request->baseUrl . '/storage/products/' . $this->image;
+    }
+
+    public function getShortDescription($length = 30)
+    {
+        return \yii\helpers\StringHelper::truncateWords(strip_tags($this->description), $length);
     }
 }
