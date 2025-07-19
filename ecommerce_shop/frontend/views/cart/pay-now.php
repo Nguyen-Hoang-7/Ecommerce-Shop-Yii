@@ -52,11 +52,13 @@ $orderAddress = $order->orderAddress;
         <table class="table table-sm">
             <thead>
             <tr>
+                <th>Image</th>
                 <th>Name</th>
                 <th>Quantity</th>
                 <th>Price</th>
             </tr>
             </thead>
+            <tbody>
             <?php foreach ($order->orderItems as $item): ?>
             <tr>
                 <td>
@@ -69,6 +71,7 @@ $orderAddress = $order->orderAddress;
                 <td><?php echo Yii::$app->formatter->asCurrency($item->unit_price) ?></td>
             </tr>
             <?php endforeach; ?>
+            </tbody>
         </table>
         <hr>
         <table class="table">
@@ -78,7 +81,7 @@ $orderAddress = $order->orderAddress;
             </tr>
             <tr>
                 <th>Total Price</th>
-                <td><?php echo $order->total_price ?></td>
+                <td><?php echo Yii::$app->formatter->asCurrency($order->total_price) ?></td>
             </tr>
 
         </table>

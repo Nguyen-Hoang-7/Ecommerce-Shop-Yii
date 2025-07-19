@@ -71,17 +71,25 @@ use common\models\Product;
                     </thead>
                     <tbody>
                     <?php foreach ($cartItems as $item): ?>
-                        <tr >
+                        <tr data-id="<?php echo $item['id'] ?>" data-url="<?php echo \yii\helpers\Url::to(['/cart/change-quantity']) ?>">
+                            <td><?php echo $item['name'] ?></td>
                             <td>
                                 <img src="<?php echo Yii::$app->request->baseUrl . '/storage/products/'. $item['image'] ?>"
-                                     style="width: 50px;"
-                                     alt="<?php echo $item['name'] ?>">
+                                     alt="<?php echo $item['image'] ?>"
+                                     style="width: 150px">
                             </td>
-                            <td><?php echo $item['name'] ?></td>
+                            <td><?php echo Yii::$app->formatter->asCurrency($item['price']) ?></td>
                             <td>
                                 <?php echo $item['quantity'] ?>
                             </td>
                             <td><?php echo Yii::$app->formatter->asCurrency($item['total_price']) ?></td>
+                            <td>
+                                <?php echo \yii\helpers\Html::a('Delete', ['/cart/delete', 'id' => $item['id']], [
+                                    'class' => 'btn btn-outline-danger btn-sm',
+                                    'data-method' => 'post',
+                                    'data-confirm' => 'Are you sure you want to delete this product from your cart?',
+                                ]) ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                     </tbody>

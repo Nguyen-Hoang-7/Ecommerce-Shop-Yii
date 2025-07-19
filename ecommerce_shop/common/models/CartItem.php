@@ -114,6 +114,16 @@ class CartItem extends \yii\db\ActiveRecord
         return $cartItems;
     }
 
+    public static function getTotalPriceForItemForUser($productId, $currentUserId) {
+        $totalPrice = CartItem::findBySql("
+            SELECT
+                SUM(p.price * c.quantity) as total_price
+            FROM cart_items c
+                    LEFT JOIN products p on p.id = c.product_id
+            WHERE c.product_id = :id AND c.created_by = :user_id", ['id' => $productId, 'user_id'=>$currentUserId])->scalar();
+        return $totalPrice;
+    }
+
     public static function getTotalPriceForUser($currentUserId) {
         $totalPrice = CartItem::findBySql("
             SELECT

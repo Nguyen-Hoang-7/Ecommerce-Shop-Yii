@@ -174,7 +174,7 @@ class Product extends \yii\db\ActiveRecord
     public function getImageUrl()
     {
 
-        return Yii::$app->request->baseUrl . '/storage/products/' . $this->image;
+        return Yii::getAlias('@frontendUrl') . '/storage/products/' . $this->image;
     }
 
     public function getShortDescription($length = 30)

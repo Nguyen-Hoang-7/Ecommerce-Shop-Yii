@@ -3,6 +3,14 @@
 $orderAddress = $order->orderAddress;
 ?>
 
+<style>
+    .row {
+        display: flex;
+    }
+    .col {
+        flex: 1;
+    }
+</style>
 <h3>Order #<?php echo $order->id ?> Summary:</h3>
 <div class="row">
     <div class="col">
@@ -60,7 +68,9 @@ $orderAddress = $order->orderAddress;
             <?php foreach ($order->orderItems as $item): ?>
                 <tr>
                     <td>
-                        <?php echo $item->product->getImageUrl() ?>
+                        <img src="<?php echo $item->product->getImageUrl() ?>"
+                         style="width: 50px;"
+                         alt="<?php echo $item->product_name ?>">
                     </td>
                     <td><?php echo $item->product_name ?></td>
                     <td><?php echo $item->quantity ?></td>

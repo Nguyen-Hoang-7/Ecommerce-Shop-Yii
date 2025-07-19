@@ -34,7 +34,7 @@
                 <td>
                     <input type="number" min="1" class="form-control item-quantity" style="width: 80px" value="<?php echo $item['quantity'] ?>">
                 </td>
-                <td><?php echo $item['total_price'] ?></td>
+                <td><?php echo Yii::$app->formatter->asCurrency($item['total_price']) ?></td>
                 <td>
                     <?php echo \yii\helpers\Html::a('Delete', ['/cart/delete', 'id' => $item['id']], [
                         'class' => 'btn btn-outline-danger btn-sm',
