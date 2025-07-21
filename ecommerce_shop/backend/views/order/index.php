@@ -5,6 +5,7 @@ use yii\helpers\Html;
 use yii\helpers\Url;
 use yii\grid\ActionColumn;
 use yii\grid\GridView;
+use yii\bootstrap5;
 
 /** @var yii\web\View $this */
 /** @var backend\models\search\OrderSearch $searchModel */
@@ -44,7 +45,14 @@ $this->params['breadcrumbs'][] = $this->title;
                 },
             ],
             'total_price:currency',
-            'status:orderStatus',
+            [
+                'attribute'=> 'status',
+                'filter' => Html::activeDropDownList($searchModel, 'status', Order::getStatusLabels(), [
+                    'class' => 'form-control',
+                    'prompt' => 'All'
+                ]),
+                'format' => ['orderStatus'],
+            ],
             //'email:email',
             //'transaction_id',
             'created_at:datetime',

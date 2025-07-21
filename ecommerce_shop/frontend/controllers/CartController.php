@@ -284,7 +284,7 @@ class CartController extends \frontend\base\Controller
 
         if ($response->statusCode === 200) {
             $order->paypal_order_id =  $paypalOrderId;
-            $order->status = $response->result->status === 'COMPLETED' ? Order::STATUS_COMPLETED : Order::STATUS_FAILED;
+            $order->status = $response->result->status === 'COMPLETED' ? Order::STATUS_PAID : Order::STATUS_FAILED;
             $paidAmount = 0;
             foreach ($response->result->purchase_units as $unit) {
                 if ($unit->amount->currency_code === 'USD') {
@@ -309,7 +309,7 @@ class CartController extends \frontend\base\Controller
 
             if ($paidAmount == $exchangePrice && $response->result->status === 'COMPLETED') {
                 CartItem::clearCartItems(Yii::$app->user->id);
-                $order->status = Order::STATUS_COMPLETED;
+                $order->status = Order::STATUS_PAID;
             }
             $order->transaction_id = $response->result->purchase_units[0]->payments->captures[0]->id;
             if ($order->save()) {
