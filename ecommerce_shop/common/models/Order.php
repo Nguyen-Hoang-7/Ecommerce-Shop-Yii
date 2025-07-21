@@ -45,6 +45,7 @@ class Order extends \yii\db\ActiveRecord
             [['transaction_id', 'created_at', 'created_by'], 'default', 'value' => null],
             [['total_price', 'status', 'firstName', 'lastName', 'email'], 'required'],
             [['total_price'], 'number'],
+            [['email'], 'email'],
             [['status', 'created_at', 'created_by'], 'default', 'value' => null],
             [['status', 'created_at', 'created_by'], 'integer'],
             [['firstName', 'lastName'], 'string', 'max' => 45],

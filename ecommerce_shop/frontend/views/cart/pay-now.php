@@ -129,7 +129,8 @@ $orderAddress = $order->orderAddress;
                     success: function(response) {
                         // Handle successful order creation
                         console.log('Order created successfully:', response);
-                        alert('Transaction completed by ' + details.payer.name.given_name);
+                        alert('Transaction completed. Thanks for your business, ' + details.payer.name.given_name);
+                        window.location.href = '';
                         // Redirect to a success page or update the UI accordingly
                     },
                     // error: function(xhr, status, error) {

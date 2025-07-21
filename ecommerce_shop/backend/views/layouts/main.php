@@ -43,23 +43,29 @@ AppAsset::register($this);
 
             <!-- Nav Item - Dashboard -->
             <li class="nav-item active">
-                <a class="nav-link" href="index.html">
+                <a class="nav-link" href="<?php echo Yii::$app->homeUrl; ?>">
                     <i class="fas fa-fw fa-tachometer-alt"></i>
                     <span>Dashboard</span></a>
             </li>
 
             <!-- Nav Item - Charts -->
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" href="<?php echo Yii::$app->urlManager->createUrl(['product/index']); ?>">
                     <i class="fas fa-fw fa-chart-area"></i>
                     <span>Products</span></a>
-            </li>
+            </li> -->
 
             <!-- Nav Item - Tables -->
             <li class="nav-item">
-                <a class="nav-link" href="tables.html">
-                    <i class="fas fa-fw fa-table"></i>
-                    <span>Product Categories</span></a>
+                <a class="nav-link" href="<?php echo \yii\helpers\Url::to(['product/index']); ?>">
+                    <i class="fas fa-fw fa-list"></i>
+                    <span>Products</span></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo \yii\helpers\Url::to(['order/index']); ?>">
+                    <i class="fas fa-money-check-alt"></i>
+                    <span>Orders</span></a>
             </li>
 
             <!-- Divider -->
@@ -345,6 +351,7 @@ AppAsset::register($this);
     </div>
 
 <?php $this->endBody() ?>
+<?php echo $this->blocks['bodyEndScript'] ?? '' ?>
 </body>
 </html>
 <?php $this->endPage();

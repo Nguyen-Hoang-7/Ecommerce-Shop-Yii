@@ -83,7 +83,7 @@ class Product extends \yii\db\ActiveRecord
      */
     public function getCartItems()
     {
-        return $this->hasMany(CartItems::class, ['product_id' => 'id']);
+        return $this->hasMany(CartItem::class, ['product_id' => 'id']);
     }
 
     /**
@@ -103,7 +103,7 @@ class Product extends \yii\db\ActiveRecord
      */
     public function getOrderItems()
     {
-        return $this->hasMany(OrderItems::class, ['product_id' => 'id']);
+        return $this->hasMany(OrderItem::class, ['product_id' => 'id']);
     }
 
     /**
@@ -174,7 +174,7 @@ class Product extends \yii\db\ActiveRecord
     public function getImageUrl()
     {
 
-        return Yii::getAlias('@frontendUrl') . '/storage/products/' . $this->image;
+        return Yii::$app->request->baseUrl . '/storage/products/' . $this->image;
     }
 
     public function getShortDescription($length = 30)

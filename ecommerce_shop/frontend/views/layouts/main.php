@@ -39,7 +39,7 @@ AppAsset::register($this);
         ['label' => 'Home', 'url' => ['/site/index']],
         [
                 'label' => 'Cart <span id="cart-quantity" class="badge bg-danger text-white"">'.$cartItemParam.'</span>',
-                'url' => Yii::$app->user->isGuest ? ['/site/login'] : ['/cart/index'],
+                'url' => ['/cart/index'],
                 'encode' => false,
         ]
         // ['label' => 'About', 'url' => ['/site/about']],
