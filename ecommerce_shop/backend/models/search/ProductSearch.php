@@ -50,6 +50,10 @@ class ProductSearch extends Product
             'query' => $query,
         ]);
 
+        $dataProvider->sort->defaultOrder = [
+            'created_at' => SORT_DESC,
+        ];
+
         $this->load($params, $formName);
 
         if (!$this->validate()) {

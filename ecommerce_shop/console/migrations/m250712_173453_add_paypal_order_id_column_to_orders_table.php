@@ -12,7 +12,7 @@ class m250712_173453_add_paypal_order_id_column_to_orders_table extends Migratio
      */
     public function safeUp()
     {
-        $this->addColumn('{{orders}}', 'paypal_order_id', $this->string(255)->after('transaction_id'));
+        $this->addColumn('{{%orders}}', 'paypal_order_id', $this->string(255)->after('transaction_id'));
     }
 
     /**
@@ -20,6 +20,6 @@ class m250712_173453_add_paypal_order_id_column_to_orders_table extends Migratio
      */
     public function safeDown()
     {
-        $this->dropColumn('{{orders}}', 'paypal_order_id');
+        $this->dropColumn('{{%orders}}', 'paypal_order_id');
     }
 }

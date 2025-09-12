@@ -4,6 +4,7 @@ namespace backend\controllers;
 
 use common\models\Order;
 use backend\models\search\OrderSearch;
+use Yii;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
@@ -65,6 +66,8 @@ class OrderController extends Controller
      * If creation is successful, the browser will be redirected to the 'view' page.
      * @return string|\yii\web\Response
      */
+
+    /*
     public function actionCreate()
     {
         $model = new Order();
@@ -81,6 +84,7 @@ class OrderController extends Controller
             'model' => $model,
         ]);
     }
+    */
 
     /**
      * Updates an existing Order model.
@@ -93,8 +97,16 @@ class OrderController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($this->request->isPost && $model->load($this->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if (Yii::$app->request->isPost) {
+            $status = Yii::$app->request->post('Order')['status'];
+            $model->status = $status;
+            if (!in_array($status, [Order::STATUS_PAID, Order::STATUS_COMPLETED])) {
+                $model->addError('status', 'Invalid status for update.');
+            }
+            // $this->request->isPost && $model->load($this->request->post())
+            elseif ($model->save()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         }
 
         return $this->render('update', [

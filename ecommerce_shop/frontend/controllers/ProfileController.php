@@ -56,6 +56,7 @@ class ProfileController extends \frontend\base\Controller
 
     public function actionUpdateAccount() {
         $user = Yii::$app->user->identity;
+        $user->scenario = \common\models\User::SCENARIO_UPDATE; // Set scenario for update
         // $userAddress = $user->getAddress();
         $success = false;
         if ($user->load(Yii::$app->request->post()) && $user->save()) {
