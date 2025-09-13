@@ -30,7 +30,10 @@ $this->params['breadcrumbs'][] = $this->title;
         'model' => $model,
         'attributes' => [
             'id',
-            'name',
+            [
+                'attribute' => 'name',
+                'options' => ['style' => 'white-space: nowrap']
+            ],
             'description:html',
             [
                 'attribute' => 'image',

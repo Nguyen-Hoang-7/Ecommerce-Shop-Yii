@@ -5,6 +5,7 @@
 
 use backend\assets\AppAsset;
 use yii\helpers\Html;
+use common\widgets\Alert;
 
 AppAsset::register($this);
 ?>
@@ -22,6 +23,7 @@ AppAsset::register($this);
 <?php $this->beginBody() ?>
 
 <div class="container">
+    
 
         <!-- Outer Row -->
         <div class="row justify-content-center">
@@ -30,6 +32,7 @@ AppAsset::register($this);
 
                 <div class="card o-hidden border-0 shadow-lg my-5">
                     <div class="card-body p-0">
+                        <?= Alert::widget() ?>
                         <?php echo $content; ?>
                     </div>
                 </div>

@@ -8,7 +8,7 @@
         </a>
         <div class="card-body">
             <h5 class="card-title">
-                <a href="#" class="text-dark"><?php echo \yii\helpers\StringHelper::truncateWords($model->name, 20) ?></a>
+                <a href="#" class="text-dark"><?php echo \yii\helpers\StringHelper::truncateWords($model->name, 7) ?></a>
             </h5>
             <h5><?php echo Yii::$app->formatter->asCurrency($model->price) ?></h5>
             <div class="card-text">

@@ -34,6 +34,7 @@ use dosamigos\ckeditor\CKEditor;
     <?= $form->field($model, 'price')->textInput([
         'type' => 'number',
         'maxlength' => true,
+        'step' => 0.01,
     ]) ?>
 
     <?= $form->field($model, 'status')->checkbox() ?>

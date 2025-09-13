@@ -73,7 +73,9 @@ class User extends ActiveRecord implements IdentityInterface
             ['status', 'in', 'range' => [self::STATUS_ACTIVE, self::STATUS_INACTIVE, self::STATUS_DELETED]],
             ['password', 'string', 'min' => 8],
             ['admin', 'default', 'value' => 0],
-            ['passwordConfirm', 'compare', 'compareAttribute' => 'password']
+            ['passwordConfirm', 'compare', 'compareAttribute' => 'password'].
+            ['username', 'unique', 'targetClass' => self::class, 'message' => 'This username has already been taken.'],
+            ['email', 'unique', 'targetClass' => self::class, 'message' => 'This email has already been taken.'],
         ];
     }
 

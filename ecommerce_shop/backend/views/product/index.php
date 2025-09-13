@@ -28,7 +28,12 @@ $this->params['breadcrumbs'][] = $this->title;
         'filterModel' => $searchModel,
         'columns' => [
             ['class' => 'yii\grid\SerialColumn'],
-            'name',
+            [
+                'attribute' => 'name',
+                'content' => function ($model) {
+                    return \yii\helpers\StringHelper::truncateWords($model->name, 7);
+                }
+            ],
             [
                 'attribute' => 'image',
                 'content' => function ($model) {
@@ -60,9 +65,12 @@ $this->params['breadcrumbs'][] = $this->title;
             //'updated_by',
             [
                 'class' => ActionColumn::className(),
+                /*
                 'urlCreator' => function ($action, Product $model, $key, $index, $column) {
                     return Url::toRoute([$action, 'id' => $model->id]);
-                 }
+                 },
+                 */
+                 'contentOptions' => ['class' => 'td-actions']
             ],
         ],
     ]); ?>
