@@ -20,18 +20,18 @@ use yii\helpers\Console;
  */
 class AppController extends Controller
 {
-    public function actionCreateAdminUser($username, $password = null)
+    public function actionCreateAdminUser($username, $email, $firstname = null, $lastname = null, $password = null)
     {
         $user = new User();
-        $user->firstname = $username;
-        $user->lastname = $username;
-        $user->email = $username.'@example.com';
+        $user->firstname = $firstname;
+        $user->lastname = $lastname;
+        $user->email = $email;
         $user->username = $username;
         $user->admin = 1;
         $user->status = User::STATUS_ACTIVE;
         $user->auth_key = \Yii::$app->security->generateRandomString();
-        $password = $password ?: \Yii::$app->security->generateRandomString(8);
-        $user->setPassword($password);
+        $user->password_hash = \Yii::$app->security->generatePasswordHash($password);
+        // $user->setPassword($password);
         if ($user->save()) {
             Console::output("User has been created");
             Console::output("Username: ".$username);
