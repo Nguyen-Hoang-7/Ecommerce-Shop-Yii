@@ -69,6 +69,7 @@ class CartController extends \frontend\base\Controller
 //                'quantity' => 1,
 //                'total_price' => $product->price,
 //            ];
+/*
             $cartItems = Yii::$app->session->get(CartItem::SESSION_KEY, []);
             $found =  false;
             foreach ($cartItems as &$cartItem) {
@@ -92,6 +93,8 @@ class CartController extends \frontend\base\Controller
 //
 //            $cartItems[] = $cartItem;
             Yii::$app->session->set(CartItem::SESSION_KEY, $cartItems);
+            */
+            return $this->redirect(['/site/login']);
         }
         else {
             $user_id = Yii::$app->user->id;
@@ -107,11 +110,13 @@ class CartController extends \frontend\base\Controller
             }
 
             if ($cartItem->save()) {
+                Yii::$app->session->setFlash('success', 'Product added to your cart successfully');
                 return[
                     'success' => true
                 ];
             }
             else {
+                Yii::$app->session->setFlash('error', 'Product added to your cart failed');
                 return [
                     'success' => false,
                     'errors' => $cartItem->errors

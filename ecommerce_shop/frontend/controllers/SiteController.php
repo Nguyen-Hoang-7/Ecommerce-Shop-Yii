@@ -91,6 +91,41 @@ class SiteController extends \frontend\base\Controller
     }
 
     /**
+     * Search products
+     *
+     * @return mixed
+     */
+    public function actionSearch()
+    {
+        $searchTerm = trim(Yii::$app->request->get('q', ''));
+        $query = Product::find()->published();
+        
+        // Nếu từ khóa tìm kiếm rỗng hoặc chỉ có khoảng trắng
+        if (empty($searchTerm)) {
+            // Tạo query rỗng để không trả về sản phẩm nào
+            $query->andWhere(['id' => -1]);
+        } else {
+            // Tìm kiếm bình thường
+            $query->andWhere(['or',
+                ['like', 'name', $searchTerm],
+                ['like', 'description', $searchTerm]
+            ]);
+        }
+        
+        $dataProvider = new \yii\data\ActiveDataProvider([
+            'query' => $query,
+            'pagination' => [
+                'pageSize' => 9,
+            ],
+        ]);
+        
+        return $this->render('search', [
+            'dataProvider' => $dataProvider,
+            'searchTerm' => $searchTerm,
+        ]);
+    }
+
+    /**
      * Logs in a user.
      *
      * @return mixed
