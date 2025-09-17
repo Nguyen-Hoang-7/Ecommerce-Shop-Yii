@@ -213,7 +213,60 @@ class CartController extends \frontend\base\Controller
             }
         }
 
-        if ($order->load(Yii::$app->request->post()) && $order->save() && $order->saveAddress(Yii::$app->request->post()) && $order->saveOrderItems()) {
+        // Debug: Log POST data
+        Yii::info('POST data: ' . print_r(Yii::$app->request->post(), true), 'checkout');
+        
+        if ($order->load(Yii::$app->request->post())) {
+            Yii::info('Order loaded successfully', 'checkout');
+            if ($order->save()) {
+                Yii::info('Order saved successfully', 'checkout');
+            } else {
+                Yii::error('Order save failed: ' . print_r($order->getErrors(), true), 'checkout');
+                Yii::$app->session->setFlash('error', 'Could not save order: ' . implode(', ', $order->getFirstErrors()));
+                return $this->render('checkout', [
+                    'order' => $order,
+                    'orderAddress' => $orderAddress,
+                    'cartItems' => $cartItems,
+                    'productQuantity' => $productQuantity,
+                    'totalPrice' => $totalPrice,
+                ]);
+            }
+        } else {
+            return $this->render('checkout', [
+                'order' => $order,
+                'orderAddress' => $orderAddress,
+                'cartItems' => $cartItems,
+                'productQuantity' => $productQuantity,
+                'totalPrice' => $totalPrice,
+            ]);
+        }
+        
+        if (true) { // Moved the logic inside
+            // Debug: Kiểm tra lưu address
+            if (!$order->saveAddress(Yii::$app->request->post())) {
+                Yii::$app->session->setFlash('error', 'Could not save address. Please check your address information.');
+                $transaction->rollBack();
+                return $this->render('checkout', [
+                    'order' => $order,
+                    'orderAddress' => $orderAddress,
+                    'cartItems' => $cartItems,
+                    'productQuantity' => $productQuantity,
+                    'totalPrice' => $totalPrice,
+                ]);
+            }
+            
+            // Debug: Kiểm tra lưu order items
+            if (!$order->saveOrderItems()) {
+                Yii::$app->session->setFlash('error', 'Could not save order items.');
+                $transaction->rollBack();
+                return $this->render('checkout', [
+                    'order' => $order,
+                    'orderAddress' => $orderAddress,
+                    'cartItems' => $cartItems,
+                    'productQuantity' => $productQuantity,
+                    'totalPrice' => $totalPrice,
+                ]);
+            }
             // Save order items
             $transaction->commit();
 
@@ -234,11 +287,13 @@ class CartController extends \frontend\base\Controller
             $order->email = $user->email;
             $order->status = Order::STATUS_DRAFT;
 
-            $orderAddress->address = $useraddress->address;
-            $orderAddress->city = $useraddress->city;
-            $orderAddress->state = $useraddress->state;
-            $orderAddress->country = $useraddress->country;
-            $orderAddress->zipcode = $useraddress->zipcode;
+            if ($useraddress) {
+                $orderAddress->address = $useraddress->address;
+                $orderAddress->ward_code = $useraddress->ward_code;
+                $orderAddress->district_code = $useraddress->district_code;
+                $orderAddress->province_code = $useraddress->province_code;
+                $orderAddress->full_address = $useraddress->full_address;
+            }
         }
 
         return $this->render('checkout', [
@@ -251,6 +306,22 @@ class CartController extends \frontend\base\Controller
         ]);
     }
 
+    /**
+     * Lấy danh sách quận/huyện theo tỉnh/thành phố
+     */
+    public function actionGetAddressChildren()
+    {
+        $parentCode = Yii::$app->request->get('parent_code');
+        $localityType = Yii::$app->request->get('locality_type', 2);
+        $status = Yii::$app->request->get('status', 'N');
+        
+        if ($parentCode) {
+            $children = \common\models\Locality::getNameAddressOptions($localityType, $status, $parentCode);
+            return $this->asJson($children);
+        }
+        
+        return $this->asJson([]);
+    }
 
     public function actionSubmitPayment($orderId)
     {
@@ -279,9 +350,18 @@ class CartController extends \frontend\base\Controller
         // Client ID : Aed_lId0dyVXC7LHaqNxbwjmrrBCedlkTGrlNCcHt0QLgvwcII7aS8Ih-fyRtlWNiMakttTFQ09r5LEC
 
 //// Validate the transactionId. It must not be used and it must be valid transacttion ID in paypal
-        $environment = new SandboxEnvironment(Yii::$app->params['paypalClientId'], Yii::$app->params['paypalSecret']);
-        $client = new PayPalHttpClient($environment);
-        $response = $client->execute(new OrdersGetRequest($paypalOrderId));
+        // Suppress deprecated warnings chỉ cho PayPal SDK
+        $oldErrorReporting = error_reporting();
+        error_reporting($oldErrorReporting & ~E_DEPRECATED);
+        
+        try {
+            $environment = new SandboxEnvironment(Yii::$app->params['paypalClientId'], Yii::$app->params['paypalSecret']);
+            $client = new PayPalHttpClient($environment);
+            $response = $client->execute(new OrdersGetRequest($paypalOrderId));
+        } finally {
+            // Khôi phục lại error reporting
+            error_reporting($oldErrorReporting);
+        }
         /**
          * Enable below line to print complete response as JSON.
          */

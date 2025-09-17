@@ -19,6 +19,7 @@ use frontend\models\ResetPasswordForm;
 use common\models\SignupForm;
 use frontend\models\ContactForm;
 use yii\data\ActiveDataProvider;
+use common\helper\StringHelper;
 
 /**
  * Site controller
@@ -106,10 +107,15 @@ class SiteController extends \frontend\base\Controller
             $query->andWhere(['id' => -1]);
         } else {
             // Tìm kiếm bình thường
-            $query->andWhere(['or',
-                ['like', 'name', $searchTerm],
-                ['like', 'description', $searchTerm]
+            
+            $searchPattern = StringHelper::createVietnameseSearchPattern($searchTerm);
+            $query->andWhere("name ~* :name",  [':name' => $searchPattern]);
+            /*
+            $query->andWhere('name ~* :name OR description ~* :description', [
+                ':name' => $searchPattern,
+                ':description' => $searchPattern
             ]);
+            */
         }
         
         $dataProvider = new \yii\data\ActiveDataProvider([

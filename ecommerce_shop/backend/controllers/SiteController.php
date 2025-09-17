@@ -138,14 +138,28 @@ class SiteController extends Controller
             }
         }
 
-        // Pie Chart
-        $countriesData = Order::findBySql("
-            SELECT country,
-                SUM(total_price) AS total_price
+        // Pie Chart - Old provinces (3 levels)
+        $provincesDataOld = Order::findBySql("
+            SELECT oa.province_code,
+                SUM(o.total_price) AS total_price
             FROM orders o
             INNER JOIN order_addresses oa ON o.id = oa.order_id
+            INNER JOIN locality l ON oa.province_code = l.code
             WHERE o.status IN (".Order::STATUS_PAID.", ".Order::STATUS_COMPLETED.")
-            GROUP BY country
+            AND l.status = 'O'
+            GROUP BY oa.province_code
+        ")->asArray()->all();
+
+        // Pie Chart - New provinces (2 levels)
+        $provincesDataNew = Order::findBySql("
+            SELECT oa.province_code,
+                SUM(o.total_price) AS total_price
+            FROM orders o
+            INNER JOIN order_addresses oa ON o.id = oa.order_id
+            INNER JOIN locality l ON oa.province_code = l.code
+            WHERE o.status IN (".Order::STATUS_PAID.", ".Order::STATUS_COMPLETED.")
+            AND l.status = 'N'
+            GROUP BY oa.province_code
         ")->asArray()->all();
 
         // $length_labels = count($labels);
@@ -154,9 +168,10 @@ class SiteController extends Controller
         // echo "</pre>";
         // exit;
 
-        $countryLabels = ArrayHelper::getColumn($countriesData, 'country');
-        $newCountries = [];
-        $bgColors = [];
+        // Process old provinces data
+        $provinceLabelsOld = ArrayHelper::getColumn($provincesDataOld, 'province_code');
+        $provinceNamesOld = [];
+        $bgColorsOld = [];
         $colorOptions = [
             '#4e73df',
             '#1cc88a',
@@ -166,14 +181,25 @@ class SiteController extends Controller
             '#f8f9fc',
             '#6c757d'
         ];
-        $hoverColors = [];
-        foreach ($countryLabels as $i => $country) {
-            /*
-            $color = "rgb(".rand(0, 255).", ".rand(0, 255).", ".rand(0, 255).")";
-            $bgColors[] = $color;
-            */
-            $bgColors[] = $colorOptions[$i % count($colorOptions)];
+        foreach ($provinceLabelsOld as $i => $province) {
+            $provinceNamesOld[] = \common\models\Locality::getCode($province)->name;
+            $bgColorsOld[] = $colorOptions[$i % count($colorOptions)];
         }
+
+        // Process new provinces data
+        $provinceLabelsNew = ArrayHelper::getColumn($provincesDataNew, 'province_code');
+        $provinceNamesNew = [];
+        $bgColorsNew = [];
+        foreach ($provinceLabelsNew as $i => $province) {
+            $provinceNamesNew[] = \common\models\Locality::getCode($province)->name;
+            $bgColorsNew[] = $colorOptions[$i % count($colorOptions)];
+        }
+
+        // Default to old provinces
+        $provinceLabels = $provinceLabelsOld;
+        $provinceNames = $provinceNamesOld;
+        $bgColors = $bgColorsOld;
+        $provincesData = $provincesDataOld;
         return $this->render('index', [
             'totalEarnings' => $totalEarnings,
             'totalOrders' => $totalOrders,
@@ -181,9 +207,19 @@ class SiteController extends Controller
             'totalUsers' => $totalUsers,
             'earningsData' => $earningsData,
             'labels' => $labels,
-            'countries' => $countryLabels,
+            'provinces' => $provinceLabels,
+            'provinceNames' => $provinceNames,
             'bgColors' => $bgColors,
-            'countriesData' => ArrayHelper::getColumn($countriesData, 'total_price'),
+            'provincesData' => ArrayHelper::getColumn($provincesData, 'total_price'),
+            // New data for toggle
+            'provinceNamesOld' => $provinceNamesOld,
+            'bgColorsOld' => $bgColorsOld,
+            'provincesDataOld' => ArrayHelper::getColumn($provincesDataOld, 'total_price'),
+            'provinceLabelsOld' => $provinceLabelsOld,
+            'provinceNamesNew' => $provinceNamesNew,
+            'bgColorsNew' => $bgColorsNew,
+            'provincesDataNew' => ArrayHelper::getColumn($provincesDataNew, 'total_price'),
+            'provinceLabelsNew' => $provinceLabelsNew,
         ]);
     }
 

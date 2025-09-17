@@ -12,6 +12,16 @@ $this->params['breadcrumbs'][] = $this->title;
 \yii\web\YiiAsset::register($this);
 
 $orderAddress = $model->orderAddress;
+
+// Lấy tên các địa phương với kiểm tra null
+$ward = \common\models\Locality::getCode($orderAddress->ward_code);
+$ward_name = $ward ? $ward->name : '';
+
+$district = \common\models\Locality::getCode($orderAddress->district_code);
+$district_name = $district ? $district->name : '';
+
+$province = \common\models\Locality::getCode($orderAddress->province_code);
+$province_name = $province ? $province->name : '';
 ?>
 <div class="order-view">
 
@@ -46,14 +56,23 @@ $orderAddress = $model->orderAddress;
     <h4>Order Address</h4>
     <?= DetailView::widget([
         'model' => $orderAddress,
-        'attributes' => [
-            'id',
+        'attributes' => array_filter([
             'address',
-            'city',
-            'state',
-            'country',
-            'zipcode',
-        ],
+            [
+                'label' => 'Ward name',
+                'value' => $ward_name,
+            ],
+            // Chỉ hiển thị District name nếu không null
+            !empty($district_name) ? [
+                'label' => 'District name',
+                'value' => $district_name,
+            ] : null,
+            [
+                'label' => 'Province name',
+                'value' => $province_name,
+            ],
+            'full_address',
+        ]),
     ]) ?>
 
     <h4>Order Items</h4>

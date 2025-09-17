@@ -128,20 +128,31 @@ $this->registerJsFile("/js/demo/chart-area-demo.js", [
                 <!-- Card Header - Dropdown -->
                 <div
                         class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                    <h6 class="m-0 font-weight-bold text-primary">Revenue Sources</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Revenue Sources according to old/new addresses</h6>
 
                 </div>
                 <!-- Card Body -->
                 <div class="card-body">
+                    <!-- Toggle checkbox -->
+                    <div class="mb-3">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="showOldProvinces" checked>
+                            <label class="form-check-label" for="showOldProvinces">
+                                Old addresses (3 levels)
+                            </label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="showNewProvinces">
+                            <label class="form-check-label" for="showNewProvinces">
+                                New addresses (2 levels)
+                            </label>
+                        </div>
+                    </div>
                     <div class="chart-pie pt-4 pb-2">
                         <canvas id="myPieChart"></canvas>
                     </div>
-                    <div class="mt-4 text-center small">
-                        <?php foreach ($countries as $i => $country): ?>
-                            <span class="mr-2">
-                                <i class="fas fa-circle" style="color: <?php echo $bgColors[$i] ?>"></i> <?php echo $country; ?>
-                            </span>
-                        <?php endforeach; ?>
+                    <div class="mt-4 text-center small" id="province-legend">
+                        <!-- Legend sẽ được cập nhật bằng JavaScript -->
                     </div>
                 </div>
             </div>
@@ -278,14 +289,32 @@ $this->registerJsFile("/js/demo/chart-area-demo.js", [
     $(function () {
         // Pie Chart Example
         var ctx = document.getElementById("myPieChart");
+        
+        // Data for old provinces
+        var oldData = {
+            labels: <?php echo yii\helpers\Json::encode($provinceNamesOld) ?>,
+            data: <?php echo yii\helpers\Json::encode($provincesDataOld) ?>,
+            colors: <?php echo yii\helpers\Json::encode($bgColorsOld) ?>,
+            provinces: <?php echo yii\helpers\Json::encode($provinceLabelsOld) ?>
+        };
+        
+        // Data for new provinces
+        var newData = {
+            labels: <?php echo yii\helpers\Json::encode($provinceNamesNew) ?>,
+            data: <?php echo yii\helpers\Json::encode($provincesDataNew) ?>,
+            colors: <?php echo yii\helpers\Json::encode($bgColorsNew) ?>,
+            provinces: <?php echo yii\helpers\Json::encode($provinceLabelsNew) ?>
+        };
+        
+        // Create chart with old data by default
         var myPieChart = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: <?php echo yii\helpers\Json::encode($countries) ?>,
+                labels: oldData.labels,
                 datasets: [{
-                    data: <?php echo yii\helpers\Json::encode($countriesData) ?>,
-                    backgroundColor: <?php echo yii\helpers\Json::encode($bgColors) ?>,
-                    hoverBackgroundColor: <?php echo yii\helpers\Json::encode($bgColors) ?>,
+                    data: oldData.data,
+                    backgroundColor: oldData.colors,
+                    hoverBackgroundColor: oldData.colors,
                     hoverBorderColor: "rgba(234, 236, 244, 1)",
                 }],
             },
@@ -307,6 +336,52 @@ $this->registerJsFile("/js/demo/chart-area-demo.js", [
                 cutoutPercentage: 80,
             },
         });
+        
+        // Toggle functionality
+        $('#showOldProvinces').change(function() {
+            if (this.checked) {
+                $('#showNewProvinces').prop('checked', false);
+                updateChart(oldData);
+            } else if (!$('#showNewProvinces').is(':checked')) {
+                // If both are unchecked, keep the old one
+                $(this).prop('checked', true);
+            }
+        });
+        
+        $('#showNewProvinces').change(function() {
+            if (this.checked) {
+                $('#showOldProvinces').prop('checked', false);
+                updateChart(newData);
+            } else if (!$('#showOldProvinces').is(':checked')) {
+                // If both are unchecked, keep the new one
+                $(this).prop('checked', true);
+            }
+        });
+        
+        function updateChart(data) {
+            myPieChart.data.labels = data.labels;
+            myPieChart.data.datasets[0].data = data.data;
+            myPieChart.data.datasets[0].backgroundColor = data.colors;
+            myPieChart.data.datasets[0].hoverBackgroundColor = data.colors;
+            myPieChart.update();
+            
+            // Update legend
+            updateLegend(data);
+        }
+        
+        function updateLegend(data) {
+            var legendHtml = '';
+            for (var i = 0; i < data.labels.length; i++) {
+                legendHtml += '<span class="mr-2">' +
+                    '<i class="fas fa-circle" style="color: ' + data.colors[i] + '"></i> ' +
+                    data.labels[i] +
+                    '</span>';
+            }
+            $('#province-legend').html(legendHtml);
+        }
+        
+        // Initialize legend with old data
+        updateLegend(oldData);
     })
     
 </script>

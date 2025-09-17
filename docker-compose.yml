@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: yii2_app_ecommerce
     ports:
-      - "8080:80"
+      - "8082:80"
     volumes:
       - ./ecommerce_shop:/var/www/html
     depends_on:

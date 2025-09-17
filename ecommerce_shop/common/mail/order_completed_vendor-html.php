@@ -1,6 +1,12 @@
 <?php
 
 $orderAddress = $order->orderAddress;
+$ward = \common\models\Locality::getCode($orderAddress->ward_code);
+$ward_name = $ward ? $ward->name : '';
+$district = \common\models\Locality::getCode($orderAddress->district_code);
+$district_name = $district ? $district->name : '';
+$province = \common\models\Locality::getCode($orderAddress->province_code);
+$province_name = $province ? $province->name : '';
 ?>
 <style>
     .row {
@@ -36,20 +42,22 @@ $orderAddress = $order->orderAddress;
                 <td><?php echo $orderAddress->address ?></td>
             </tr>
             <tr>
-                <th>City</th>
-                <td><?php echo $orderAddress->city ?></td>
+                <th>Ward</th>
+                <td><?php echo $ward_name ?></td>
+            </tr>
+            <?php if (!empty($district_name)): ?>
+            <tr>
+                <th>District</th>
+                <td><?php echo $district_name ?></td>
+            </tr>
+            <?php endif; ?>
+            <tr>
+                <th>Province</th>
+                <td><?php echo $province_name ?></td>
             </tr>
             <tr>
-                <th>State</th>
-                <td><?php echo $orderAddress->state ?></td>
-            </tr>
-            <tr>
-                <th>Country</th>
-                <td><?php echo $orderAddress->country ?></td>
-            </tr>
-            <tr>
-                <th>Zipcode</th>
-                <td><?php echo $orderAddress->zipcode ?></td>
+                <th>Full Address</th>
+                <td><?php echo $orderAddress->full_address ?></td>
             </tr>
 
         </table>

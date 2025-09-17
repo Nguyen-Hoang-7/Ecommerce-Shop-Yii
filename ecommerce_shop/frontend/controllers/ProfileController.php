@@ -42,10 +42,22 @@ class ProfileController extends \frontend\base\Controller
         $user = Yii::$app->user->identity;
         $userAddress = $user->getAddress();
         $success = false;
-        if ($userAddress->load(Yii::$app->request->post()) && $userAddress->save()) {
-            $success = true;
-            Yii::$app->session->setFlash('success', 'Your address was updated successfully.');
-            return $this->redirect(['index']);
+        
+        if (Yii::$app->request->isPost) {
+            $postData = Yii::$app->request->post();
+            
+            // Load dữ liệu từ form
+            $userAddress->address = $postData['UserAddress']['address'] ?? '';
+            $userAddress->province_code = $postData['UserAddress']['province_code'] ?? '';
+            $userAddress->district_code = $postData['UserAddress']['district_code'] ?? '';
+            $userAddress->ward_code = $postData['UserAddress']['ward_code'] ?? '';
+            
+            // full_address sẽ được tự động tạo trong beforeSave()
+            if ($userAddress->save()) {
+                $success = true;
+                Yii::$app->session->setFlash('success', 'Your address was updated successfully.');
+                return $this->redirect(['index']);
+            }
         }
 
         return $this->render('user_address', [

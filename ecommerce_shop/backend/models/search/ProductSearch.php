@@ -5,6 +5,7 @@ namespace backend\models\search;
 use yii\base\Model;
 use yii\data\ActiveDataProvider;
 use common\models\Product;
+use common\helper\StringHelper;
 
 /**
  * ProductSearch represents the model behind the search form of `common\models\Product`.
@@ -73,9 +74,12 @@ class ProductSearch extends Product
             'updated_by' => $this->updated_by,
         ]);
 
-        $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['like', 'description', $this->description])
-            ->andFilterWhere(['like', 'image', $this->image]);
+        if ($this->name) {
+            $searchPattern = StringHelper::createVietnameseSearchPattern($this->name);
+            $query->andWhere("name ~* :name",  [':name' => $searchPattern]);
+        }
+        $query->andFilterWhere(['like', 'description', $this->description]);
+        $query->andFilterWhere(['like', 'image', $this->image]);
 
         return $dataProvider;
     }

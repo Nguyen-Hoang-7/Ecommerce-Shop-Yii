@@ -117,12 +117,54 @@ class Order extends \yii\db\ActiveRecord
     public function saveAddress($postData) {
         $orderAddress = new OrderAddress();
         $orderAddress->order_id = $this->id;
-        if ($orderAddress->load($postData) && $orderAddress->save()) {
-            
-            return true;
-        } 
-        throw new Exception('Could not save order address: '. implode('<br>', $orderAddress->getFirstErrors()));
         
+        // Load data
+        if ($orderAddress->load($postData)) {
+            // Đảm bảo full_address được set trước khi save
+            if (empty($orderAddress->full_address)) {
+                $orderAddress->full_address = $orderAddress->getFullAddress();
+            }
+            
+            if ($orderAddress->save()) {
+                // Lưu địa chỉ vào user_address nếu user đã đăng nhập
+                $this->saveUserAddress($postData);
+                return true;
+            } else {
+                // Debug: Log validation errors
+                Yii::error("OrderAddress save failed: " . print_r($orderAddress->getErrors(), true), 'order');
+            }
+        } else {
+            // Debug: Log load errors
+            Yii::error("OrderAddress load failed: " . print_r($orderAddress->getErrors(), true), 'order');
+        }
+        
+        throw new Exception('Could not save order address: '. implode('<br>', $orderAddress->getFirstErrors()));
+    }
+    
+    /**
+     * Lưu địa chỉ vào bảng user_addresses
+     */
+    private function saveUserAddress($postData) {
+        if (Yii::$app->user->isGuest) {
+            return false;
+        }
+        
+        $user = Yii::$app->user->identity;
+        $userAddress = $user->getAddress();
+        
+        if (!$userAddress) {
+            $userAddress = new \common\models\UserAddress();
+            $userAddress->user_id = $user->id;
+        }
+        
+        // Load dữ liệu từ form
+        $userAddress->address = $postData['OrderAddress']['address'] ?? '';
+        $userAddress->province_code = $postData['OrderAddress']['province_code'] ?? '';
+        $userAddress->district_code = $postData['OrderAddress']['district_code'] ?? '';
+        $userAddress->ward_code = $postData['OrderAddress']['ward_code'] ?? '';
+        
+        // full_address sẽ được tự động tạo trong beforeSave()
+        return $userAddress->save();
     }
 
     public function saveOrderItems() {
